@@ -45,7 +45,7 @@ resource "aws_ecs_cluster" "cluster" {
 
 module "ecs-instances" {
   source  = "npalm/ecs-instances/aws"
-  version = "0.1"
+  version = "0.1.1"
 
   ecs_cluster_name = "${aws_ecs_cluster.cluster.name}"
 
