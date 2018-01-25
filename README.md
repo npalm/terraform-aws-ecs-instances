@@ -8,10 +8,15 @@ This modules creates EC2 instances for a ECS cluster using autoscaling groups. T
 
 ## Example usages:
 ```
-### Create a VPC.
 locals {
+  aws_region  = "eu-west-1"
   environment = "dev"
-  key_name = "dev-key"
+  key_name    = "dev-key"
+}
+
+provider "aws" {
+  region  = "${local.aws_region}"
+  version = "1.7.1"
 }
 
 module "vpc" {
@@ -19,11 +24,10 @@ module "vpc" {
   version = "1.1.0"
 
   environment = "${local.environment}"
-  aws_region  = "${var.aws_region}"
+  aws_region  = "${local.aws_region}"
 
   create_private_hosted_zone = "false"
 
-  // example to override default availability_zones
   availability_zones = {
     eu-west-1 = ["eu-west-1a", "eu-west-1b"]
   }
@@ -31,12 +35,12 @@ module "vpc" {
 
 ### Create a key pair
 resource "aws_key_pair" "key" {
-  key_name   = "${var.key_name}"
+  key_name   = "${local.key_name}"
   public_key = "${file("id_rsa.pub")}"
 }
 
 resource "aws_ecs_cluster" "cluster" {
-  name = "${var.environment}-ecs-cluster"
+  name = "${local.environment}-ecs-cluster"
 }
 
 module "ecs-instances" {
@@ -45,16 +49,14 @@ module "ecs-instances" {
 
   ecs_cluster_name = "${aws_ecs_cluster.cluster.name}"
 
-  aws_region  = "${var.aws_region}"
+  aws_region  = "${local.aws_region}"
   environment = "${local.environment}"
   key_name    = "${local.key_name}"
 
   vpc_id   = "${module.vpc.vpc_id}"
   vpc_cidr = "${module.vpc.vpc_cidr}"
   subnets  = "${module.vpc.private_subnets}"
-
 }
-
 
 ```
 
