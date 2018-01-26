@@ -80,3 +80,8 @@ variable "user_data" {
   type        = "string"
   default     = ""
 }
+
+variable "create_ecs_service_role" {
+  description = "If true creates a ECS service role."
+  default     = true
+}

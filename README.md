@@ -88,6 +88,7 @@ module "ecs-instances-aws" {
 | asg_min | Minimum numbers of instances in the auto scaling group. | string | `1` | no |
 | aws_region | The AWS region to be used. | string | - | yes |
 | coreos_amis | A map of region to core os AMI. By default the latest available will be chosen. | map | `<map>` | no |
+| create_ecs_service_role | If true creates a ECS service role. | string | `true` | no |
 | ecs_cluster_name | Name of the ECS cluster. | string | - | yes |
 | ecs_optimized_amis | A map of region to ecs optimized AMI. By default the latest available will be chosen. | map | `<map>` | no |
 | environment | Logical name of the environment, will be used as prefix and in tags. | string | - | yes |
@@ -98,3 +99,9 @@ module "ecs-instances-aws" {
 | user_data | Override the module embedded user data script. | string | `` | no |
 | vpc_cidr | CIDR for the VPC. | string | - | yes |
 | vpc_id | ID of the VPC. | string | - | yes |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| service_role_arn | ARN of IAM role for the ecs agent. |
