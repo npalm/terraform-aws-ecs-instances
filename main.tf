@@ -95,11 +95,16 @@ locals {
   aws_ami             = "${local.aws_ami_userdefined == "" ? data.aws_ami.aws_optimized_ecs.id : local.aws_ami_userdefined}"
 }
 
+locals {
+  user_data_aws    = "${var.user_data == "" && var.os != "coreos" ? data.template_file.ecs_linux.rendered : var.user_data}"
+  user_data_coreos = "${var.user_data == "" && var.os == "coreos" ? data.template_file.cloud_config.rendered : var.user_data}"
+}
+
 resource "aws_launch_configuration" "ecs_instance" {
   security_groups      = ["${aws_security_group.instance_sg.id}"]
   key_name             = "${var.key_name}"
   image_id             = "${var.os == "coreos" ? "${local.coreos_ami}" : "${local.aws_ami}"}"
-  user_data            = "${var.os == "coreos" ? "${data.template_file.cloud_config.rendered}" : "${data.template_file.ecs_linux.rendered}"}"
+  user_data            = "${var.os == "coreos" ? "${local.user_data_coreos}" : "${local.user_data_aws}"}"
   instance_type        = "${var.instance_type}"
   iam_instance_profile = "${aws_iam_instance_profile.ecs_instance.name}"
 

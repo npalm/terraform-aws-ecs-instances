@@ -74,3 +74,9 @@ variable "ecs_cluster_name" {
   description = "Name of the ECS cluster."
   type        = "string"
 }
+
+variable "user_data" {
+  description = "Override the module embedded user data script."
+  type        = "string"
+  default     = ""
+}
