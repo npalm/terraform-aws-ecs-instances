@@ -55,13 +55,13 @@ variable "subnets" {
 
 variable "coreos_amis" {
   description = "A map of region to core os AMI. By default the latest available will be chosen."
-  type        = "map"
+  type        = map
   default     = {}
 }
 
 variable "ecs_optimized_amis" {
   description = "A map of region to ecs optimized AMI. By default the latest available will be chosen."
-  type        = "map"
+  type        = map
   default     = {}
 }
 
