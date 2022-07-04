@@ -50,7 +50,7 @@ variable "environment" {
 
 variable "subnets" {
   description = "Subnets where the instances will be deployed to."
-  type        = "list"
+  type        = list
 }
 
 variable "coreos_amis" {
