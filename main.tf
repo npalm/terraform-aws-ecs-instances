@@ -23,40 +23,29 @@ resource "aws_autoscaling_group" "ecs_instance" {
 }
 
 data "aws_ami" "aws_optimized_ecs" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["amzn-ami*amazon-ecs-optimized"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["591542846629"] # AWS
-}
-
-data "aws_ami" "stable_coreos" {
-  most_recent = true
+  most_recent = true # get the latest version
 
   filter {
     name = "name"
-    values = ["amzn2-ami-*-hvm-*-arm64-gp2"]
+    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"] # ECS optimized image
   }
+
+  owners = [
+    "amazon" # Only official images
+  ]
+}
+
+data "aws_ami" "stable_coreos" {
+  most_recent = true # get the latest version
 
   filter {
-    name = "architecture"
-    values = ["arm64"]
+    name = "name"
+    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"] # ECS optimized image
   }
 
-  owners = ["amazon"]
+  owners = [
+    "amazon" # Only official images
+  ]
 }
 
 data "template_file" "cloud_config" {
@@ -66,7 +55,7 @@ data "template_file" "cloud_config" {
     aws_region         = "${var.aws_region}"
     ecs_cluster_name   = "${var.ecs_cluster_name}"
     ecs_log_level      = "info"
-    ecs_agent_version  = "latest"
+    ecs_agent_version  = "1.61.3"
     ecs_log_group_name = "${aws_cloudwatch_log_group.ecs.name}"
   }
 }
