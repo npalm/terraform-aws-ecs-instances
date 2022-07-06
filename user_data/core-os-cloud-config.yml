@@ -16,7 +16,7 @@ coreos:
        [Service]
        Environment=ECS_CLUSTER=${ecs_cluster_name}
        Environment=ECS_LOGLEVEL=${ecs_log_level}
-       Environment=ECS_VERSION=${ecs_agent_version}
+       Environment=ECS_VERSION=1.61.3
        Restart=on-failure
        RestartSec=30
        RestartPreventExitStatus=5
@@ -24,7 +24,7 @@ coreos:
        ExecStartPre=-/bin/mkdir -p /var/log/ecs /var/ecs-data /etc/ecs
        ExecStartPre=-/usr/bin/docker kill ecs-agent
        ExecStartPre=-/usr/bin/docker rm ecs-agent
-       ExecStartPre=/usr/bin/docker pull amazon/amazon-ecs-agent:$${ECS_VERSION}
+       ExecStartPre=/usr/bin/docker pull amazon/amazon-ecs-agent:v1.61.3
        ExecStart=/usr/bin/docker run --name ecs-agent \
                                      --volume=/var/run/docker.sock:/var/run/docker.sock \
                                      --volume=/var/log/ecs:/log \
@@ -40,4 +40,4 @@ coreos:
                                      --log-driver=awslogs \
                                      --log-opt awslogs-region=${aws_region} \
                                      --log-opt awslogs-group=${ecs_log_group_name} \
-                                     amazon/amazon-ecs-agent:$${ECS_VERSION}
+                                     amazon/amazon-ecs-agent:1.61.3

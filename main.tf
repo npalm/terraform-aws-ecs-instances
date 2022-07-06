@@ -2,7 +2,7 @@
 
 resource "aws_autoscaling_group" "ecs_instance" {
   name                      = "${var.environment}-as-group"
-  vpc_zone_identifier       = ["${var.subnets}"]
+  vpc_zone_identifier       = "${var.subnets}"
   min_size                  = "${var.asg_min}"
   max_size                  = "${var.asg_max}"
   desired_capacity          = "${var.asg_desired}"
@@ -23,55 +23,39 @@ resource "aws_autoscaling_group" "ecs_instance" {
 }
 
 data "aws_ami" "aws_optimized_ecs" {
-  most_recent = true
+  most_recent = true # get the latest version
 
   filter {
-    name   = "name"
-    values = ["amzn-ami*amazon-ecs-optimized"]
+    name = "name"
+    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"] # ECS optimized image
   }
 
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["591542846629"] # AWS
+  owners = [
+    "amazon" # Only official images
+  ]
 }
 
 data "aws_ami" "stable_coreos" {
-  most_recent = true
+  most_recent = true # get the latest version
 
   filter {
-    name   = "name"
-    values = ["CoreOS-stable-*"]
+    name = "name"
+    values = ["amzn2-ami-ecs-hvm-*-x86_64-ebs"] # ECS optimized image
   }
 
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["595879546273"] # CoreOS
+  owners = [
+    "amazon" # Only official images
+  ]
 }
 
 data "template_file" "cloud_config" {
   template = "${file("${path.module}/user_data/core-os-cloud-config.yml")}"
 
-  vars {
+  vars = {
     aws_region         = "${var.aws_region}"
     ecs_cluster_name   = "${var.ecs_cluster_name}"
     ecs_log_level      = "info"
-    ecs_agent_version  = "latest"
+    ecs_agent_version  = "1.61.3"
     ecs_log_group_name = "${aws_cloudwatch_log_group.ecs.name}"
   }
 }
@@ -79,7 +63,7 @@ data "template_file" "cloud_config" {
 data "template_file" "ecs_linux" {
   template = "${file("${path.module}/user_data/amzl-user-data.tpl")}"
 
-  vars {
+  vars = {
     ecs_cluster_name   = "${var.ecs_cluster_name}"
     ecs_log_group_name = "${aws_cloudwatch_log_group.ecs.name}"
   }
@@ -126,7 +110,7 @@ resource "aws_security_group" "instance_sg" {
     to_port   = 65535
 
     cidr_blocks = [
-      "${var.vpc_cidr}",
+      "0.0.0.0/0"
     ]
   }
 
@@ -137,14 +121,14 @@ resource "aws_security_group" "instance_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags  = {
     Name        = "${var.environment}-ecs-cluster-sg"
     Environment = "${var.environment}"
   }
 }
 
 resource "aws_iam_instance_profile" "ecs_instance" {
-  name = "${var.environment}-ecs-instance-profile"
+  name_prefix = "${var.environment}-ecs-instance-profile"
   role = "${aws_iam_role.ecs_instance.name}"
 }
 
@@ -153,7 +137,7 @@ data "template_file" "instance_role_trust_policy" {
 }
 
 resource "aws_iam_role" "ecs_instance" {
-  name               = "${var.environment}-ecs-instance-role"
+  name_prefix = "${var.environment}-ecs-instance-role"
   assume_role_policy = "${data.template_file.instance_role_trust_policy.rendered}"
 }
 
@@ -162,7 +146,7 @@ data "template_file" "instance_profile" {
 }
 
 resource "aws_iam_role_policy" "ecs_instance" {
-  name   = "${var.environment}-ecs-instance-role"
+  name_prefix   = "${var.environment}-ecs-instance-role"
   role   = "${aws_iam_role.ecs_instance.name}"
   policy = "${data.template_file.instance_profile.rendered}"
 }
@@ -172,7 +156,7 @@ resource "aws_iam_role_policy" "ecs_instance" {
 resource "aws_cloudwatch_log_group" "ecs" {
   name = "${var.environment}-ecs-group/ecs-agent"
 
-  tags {
+  tags = {
     Name        = "${var.environment}-ecs-cluster-sg"
     Environment = "${var.environment}"
   }
