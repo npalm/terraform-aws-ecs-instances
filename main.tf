@@ -139,7 +139,7 @@ resource "aws_security_group" "instance_sg" {
 }
 
 resource "aws_iam_instance_profile" "ecs_instance" {
-  name = "${var.environment}-ecs-instance-profile"
+  name_prefix = "${var.environment}-ecs-instance-profile"
   role = "${aws_iam_role.ecs_instance.name}"
 }
 
