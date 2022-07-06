@@ -121,7 +121,7 @@ resource "aws_security_group" "instance_sg" {
     to_port   = 65535
 
     cidr_blocks = [
-      "${var.vpc_cidr}",
+      "0.0.0.0/0"
     ]
   }
 
@@ -148,7 +148,7 @@ data "template_file" "instance_role_trust_policy" {
 }
 
 resource "aws_iam_role" "ecs_instance" {
-  name               = "${var.environment}-ecs-instance-role"
+  name_prefix = "${var.environment}-ecs-instance-role"
   assume_role_policy = "${data.template_file.instance_role_trust_policy.rendered}"
 }
 
@@ -157,7 +157,7 @@ data "template_file" "instance_profile" {
 }
 
 resource "aws_iam_role_policy" "ecs_instance" {
-  name   = "${var.environment}-ecs-instance-role"
+  name_prefix   = "${var.environment}-ecs-instance-role"
   role   = "${aws_iam_role.ecs_instance.name}"
   policy = "${data.template_file.instance_profile.rendered}"
 }
